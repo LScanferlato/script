@@ -1,0 +1,2 @@
+#!/bin/bash
+rembg -o $1.png $1
