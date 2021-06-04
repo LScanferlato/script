@@ -1,0 +1,7 @@
+#!/bin/bash
+find . -type f -not -iname '*.webp' -exec sh -c 'cwebp -q 75 $1 -o "${1%}.webp"' _ {} \;
+find . -type f -iname "*.gif" -exec sh -c 'gif2webp $1 -o "${1%}.webp"' _ {} \;
+find . -type f -iname "*.webp" -exec sh -c 'rm "%s\n" "${0%.*}"' {} ';'
+exit
+exit
+
