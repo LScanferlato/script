@@ -1,0 +1,1 @@
+for oldName in `find . -name "*.*.*"`; do newName=`echo $oldName | rev | cut -f2- -d'.' | rev`; mv $oldName $newName; done
