@@ -1,2 +1,3 @@
 #! /usr/bin/env bash
 convert $1 -trim +repage $1.webp
+rm $1
