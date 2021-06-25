@@ -1,2 +1,3 @@
+#!/bin/bash
 convert $1 -gravity East -crop 50%x100%+0+0 $1r.png
 convert $1 -gravity West -crop 50%x100%+0+0 $1l.png
