@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# Script per gestire un pod Jupyter Datascience Notebook
+
+# Variabili configurabili
+POD_NAME="jupyter-datascience"
+IMAGE="quay.io/jupyter/datascience-notebook:latest"
+HOST_PORT=8888
+CONTAINER_PORT=8888
+VOLUME_HOST="/path/to/your/notebook/directory"
+VOLUME_CONTAINER="/home/jovyan/work"
+
+# Funzione per stampare messaggi di stato
+print_status() {
+    echo -e "\e[1;34m[*] $1\e[0m"
+}
+
+# Funzione per stampare messaggi di errore
+print_error() {
+    echo -e "\e[1;31m[!] ERRORE: $1\e[0m"
+}
+
+# Funzione per stampare messaggi di successo
+print_success() {
+    echo -e "\e[1;32m[+] $1\e[0m"
+}
+
+# Aggiorna l'immagine
+update_image() {
+    print_status "Aggiornamento dell'immagine ${IMAGE}..."
+    podman pull ${IMAGE}
+    if [ $? -eq 0 ]; then
+        print_success "Immagine aggiornata con successo"
+    else
+        print_error "Impossibile aggiornare l'immagine"
+        exit 1
+    fi
+}
+
+# Rimuovi il pod esistente
+remove_existing_pod() {
+    print_status "Verifica di pod esistenti..."
+    if podman ps -a | grep -q ${POD_NAME}; then
+        print_status "Rimozione del pod esistente..."
+        podman stop ${POD_NAME}
+        podman rm ${POD_NAME}
+        print_success "Pod rimosso"
+    else
+        print_status "Nessun pod esistente trovato"
+    fi
+}
+
+# Crea e avvia un nuovo pod
+create_and_start_pod() {
+    print_status "Creazione e avvio del nuovo pod..."
+    podman run -d \
+        --name ${POD_NAME} \
+        -p ${HOST_PORT}:${CONTAINER_PORT} \
+        -v ${VOLUME_HOST}:${VOLUME_CONTAINER} \
+        -e JUPYTER_TOKEN="your_secure_token_here" \
+        ${IMAGE}
+    
+    if [ $? -eq 0 ]; then
+        print_success "Pod avviato con successo su http://localhost:${HOST_PORT}"
+        print_status "Token di accesso: your_secure_token_here"
+    else
+        print_error "Impossibile avviare il pod"
+        exit 1
+    fi
+}
+
+# Funzione principale
+main() {
+    case "$1" in
+        update)
+            update_image
+            remove_existing_pod
+            create_and_start_pod
+            ;;
+        start)
+            create_and_start_pod
+            ;;
+        stop)
+            print_status "Interruzione del pod..."
+            podman stop ${POD_NAME}
+            print_success "Pod interrotto"
+            ;;
+        remove)
+            remove_existing_pod
+            ;;
+        status)
+            podman ps -a | grep ${POD_NAME}
+            ;;
+        *)
+            echo "Uso: $0 {update|start|stop|remove|status}"
+            exit 1
+    esac
+}
+
+# Esegui la funzione principale con gli argomenti passati
+main "$@"
